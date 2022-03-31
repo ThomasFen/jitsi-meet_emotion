@@ -1,26 +1,24 @@
-// @flow
 import './faceApiPatch';
+
+import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 import * as faceapi from '@vladmandic/face-api';
 
-import {
-    CLEAR_TIMEOUT,
-    CPU_TIME_INTERVAL,
-    FACIAL_EXPRESSION_MESSAGE,
-    INIT_WORKER,
-    SET_TIMEOUT,
-    INTERVAL_MESSAGE,
-    WEBGL_TIME_INTERVAL
-} from './constants';
+import { DETECTION_TYPES, DETECT_FACE, FACE_BOX_MESSAGE, FACIAL_EXPRESSION_MESSAGE, INIT_WORKER } from './constants';
 
 /**
- * A flag that indicates whether the tensorflow models were loaded or not.
+ * Detection types to be applied.
+ */
+let faceDetectionTypes = [];
+
+/**
+ * Indicates whether an init error occured.
+ */
+let initError = false;
+
+/**
+ * A flag that indicates whether the models are loaded or not.
  */
 let modelsLoaded = false;
-
-/**
- * The url where the models for the facial detection of expressions are located.
- */
-let modelsURL;
 
 /**
  * A flag that indicates whether the tensorflow backend is set or not.
@@ -28,93 +26,139 @@ let modelsURL;
 let backendSet = false;
 
 /**
- * A timer variable for set interval.
+ * Flag for indicating whether an init operation (setting tf backend, loading models) is in progress.
  */
-let timer;
+let initInProgress = false;
 
 /**
- * The duration of the set timeout.
+ * Flag for indicating whether a face detection flow is in progress or not.
  */
-let timeoutDuration = -1;
+let detectionInProgress = false;
 
 /**
- * A patch for having window object in the worker.
+ * Contains the last valid face bounding box (passes threshold validation) which was sent to the main process.
  */
-const window = {
-    screen: {
-        width: 1280,
-        height: 720
+let lastValidFaceBox;
+
+const detectFaceBox = async ({ imageTensor, threshold }) => {
+    const detections = await faceapi.detectAllFaces(imageTensor, new faceapi.TinyFaceDetectorOptions());
+
+    if (!detections.length) {
+        return;
+    }
+
+    const faceBox = {
+        // normalize to percentage based
+        left: Math.round(Math.min(...detections.map(d => d.relativeBox.left)) * 100),
+        right: Math.round(Math.max(...detections.map(d => d.relativeBox.right)) * 100),
+        top: Math.round(Math.min(...detections.map(d => d.relativeBox.top)) * 100),
+        bottom: Math.round(Math.max(...detections.map(d => d.relativeBox.bottom)) * 100)
+    };
+
+    if (lastValidFaceBox && Math.abs(lastValidFaceBox.left - faceBox.left) < threshold) {
+        return;
+    }
+
+    lastValidFaceBox = faceBox;
+
+    self.postMessage({
+        type: FACE_BOX_MESSAGE,
+        value: faceBox
+    });
+};
+
+const detectFaceExpressions = async ({ imageTensor }) => {
+    const detections = await faceapi.detectSingleFace(
+        imageTensor,
+        new faceapi.TinyFaceDetectorOptions()
+    ).withFaceExpressions();
+
+    const facialExpression = detections?.expressions.asSortedArray()[0].expression;
+
+    if (facialExpression) {
+        self.postMessage({
+            type: FACIAL_EXPRESSION_MESSAGE,
+            value: facialExpression
+        });
     }
 };
 
-onmessage = async function(message) {
-    switch (message.data.type) {
-    case INIT_WORKER : {
-        modelsURL = message.data.url;
-        if (message.data.windowScreenSize) {
-            window.screen = message.data.windowScreenSize;
-        }
-        break;
+const detect = async ({ image, threshold }) => {
+    detectionInProgress = true;
+    faceapi.tf.engine().startScope();
+
+    const imageTensor = faceapi.tf.browser.fromPixels(image);
+
+    if (faceDetectionTypes.includes(DETECTION_TYPES.FACE_BOX)) {
+        await detectFaceBox({
+            imageTensor,
+            threshold
+        });
     }
 
-    case SET_TIMEOUT : {
-        if (!message.data.imageBitmap || !modelsURL) {
-            self.postMessage({
-                type: FACIAL_EXPRESSION_MESSAGE,
-                value: null
-            });
-        }
+    if (faceDetectionTypes.includes(DETECTION_TYPES.FACE_EXPRESSIONS)) {
+        await detectFaceExpressions({ imageTensor });
+    }
 
-        // the models are loaded
-        if (!modelsLoaded) {
-            await faceapi.loadTinyFaceDetectorModel(modelsURL);
-            await faceapi.loadFaceExpressionModel(modelsURL);
-            modelsLoaded = true;
-        }
-        faceapi.tf.engine().startScope();
-        const tensor = faceapi.tf.browser.fromPixels(message.data.imageBitmap);
-        const detections = await faceapi.detectSingleFace(
-                tensor,
-                new faceapi.TinyFaceDetectorOptions()
-        ).withFaceExpressions();
+    faceapi.tf.engine().endScope();
+    detectionInProgress = false;
+};
 
-        // The backend is set
-        if (!backendSet) {
-            const backend = faceapi.tf.getBackend();
+const init = async ({ baseUrl, detectionTypes }) => {
+    initInProgress = true;
 
-            if (backend) {
-                if (backend === 'webgl') {
-                    timeoutDuration = WEBGL_TIME_INTERVAL;
-                } else if (backend === 'cpu') {
-                    timeoutDuration = CPU_TIME_INTERVAL;
-                }
-                self.postMessage({
-                    type: INTERVAL_MESSAGE,
-                    value: timeoutDuration
-                });
-                backendSet = true;
+    faceDetectionTypes = detectionTypes;
+
+    if (!backendSet) {
+        try {
+            if (self.useWasm) {
+                setWasmPaths(baseUrl);
+                await faceapi.tf.setBackend('wasm');
+            } else {
+                await faceapi.tf.setBackend('webgl');
             }
-        }
-        faceapi.tf.engine().endScope();
-        let facialExpression;
+            backendSet = true;
+        } catch (err) {
+            initError = true;
 
-        if (detections) {
-            facialExpression = detections.expressions.asSortedArray()[0].expression;
+            return;
         }
-        timer = setTimeout(() => {
-            self.postMessage({
-                type: FACIAL_EXPRESSION_MESSAGE,
-                value: facialExpression
-            });
-        }, timeoutDuration);
+    }
+
+    // load face detection model
+    if (!modelsLoaded) {
+        try {
+            await faceapi.loadTinyFaceDetectorModel(baseUrl);
+
+            if (detectionTypes.includes(DETECTION_TYPES.FACE_EXPRESSIONS)) {
+                await faceapi.loadFaceExpressionModel(baseUrl);
+            }
+
+            modelsLoaded = true;
+        } catch (err) {
+            initError = true;
+
+            return;
+        }
+    }
+
+    initInProgress = false;
+};
+
+onmessage = function(message) {
+    switch (message.data.type) {
+    case DETECT_FACE: {
+        if (initInProgress || initError || detectionInProgress) {
+            return;
+        }
+
+        detect(message.data);
+
         break;
     }
 
-    case CLEAR_TIMEOUT: {
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
+    case INIT_WORKER: {
+        init(message.data);
         break;
     }
     }
