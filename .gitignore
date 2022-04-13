@@ -92,3 +92,4 @@ twa/*.apk
 twa/*.aab
 twa/assetlinks.json
 
+resources/load-test/package-lock.json

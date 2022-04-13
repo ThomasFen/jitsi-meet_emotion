@@ -17,6 +17,7 @@ import { getConferenceInfo } from '../functions';
 
 import ConferenceInfoContainer from './ConferenceInfoContainer';
 import InsecureRoomNameLabel from './InsecureRoomNameLabel';
+import EmotionLabel from './EmotionLabel';
 import ParticipantsCount from './ParticipantsCount';
 import RaisedHandsCountLabel from './RaisedHandsCountLabel';
 import SubjectText from './SubjectText';
@@ -82,6 +83,10 @@ const COMPONENTS = [
     {
         Component: InsecureRoomNameLabel,
         id: 'insecure-room'
+    },
+    {
+        Component: EmotionLabel,
+        id: 'emotion'
     }
 ];
 

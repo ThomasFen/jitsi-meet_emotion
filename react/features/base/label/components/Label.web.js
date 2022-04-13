@@ -6,7 +6,7 @@ import React from 'react';
 import Icon from '../../icons/components/Icon';
 import { withPixelLineHeight } from '../../styles/functions.web';
 import { COLORS } from '../constants';
-
+import BaseTheme from '../../../base/ui/components/BaseTheme';
 import AbstractLabel, {
     type Props as AbstractProps
 } from './AbstractLabel';
@@ -59,7 +59,7 @@ const styles = theme => {
             ...withPixelLineHeight(theme.typography.labelRegular),
 
             alignItems: 'center',
-            background: theme.palette.ui04,
+           background: theme.palette.ui04,
             borderRadius: theme.shape.borderRadius / 2,
             color: theme.palette.text01,
             display: 'flex',
@@ -86,6 +86,9 @@ const styles = theme => {
         },
         [COLORS.red]: {
             background: theme.palette.actionDanger
+        },
+        [COLORS.transparent]: {
+            background: 'transparent'
         }
     };
 };
@@ -108,10 +111,11 @@ class Label extends AbstractLabel<Props, *> {
             className,
             color,
             icon,
+            iconSize,
             iconColor,
             id,
             onClick,
-            text
+            text,
         } = this.props;
         const labelClassName = clsx(
             classes.label,
@@ -127,7 +131,7 @@ class Label extends AbstractLabel<Props, *> {
                 onClick = { onClick }>
                 { icon && <Icon
                     color = { iconColor }
-                    size = '16'
+                    size = { iconSize != null ? iconSize : '16' }
                     src = { icon } /> }
                 { text && <span className = { icon && classes.withIcon }>{text}</span> }
             </div>
