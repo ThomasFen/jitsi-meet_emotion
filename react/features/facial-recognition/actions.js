@@ -1,8 +1,8 @@
 // @flow
-import { getLocalVideoTrack } from '../base/tracks';
+import { getLocalVideoTrack } from "../base/tracks";
 
-import 'image-capture';
-import './createImageBitmap';
+import "image-capture";
+import "./createImageBitmap";
 
 import {
     ADD_FACIAL_EXPRESSION,
@@ -10,17 +10,34 @@ import {
     CLEAR_FACIAL_EXPRESSIONS_BUFFER,
     SET_DETECTION_TIME_INTERVAL,
     START_FACIAL_RECOGNITION,
-    STOP_FACIAL_RECOGNITION
-} from './actionTypes';
+    STOP_FACIAL_RECOGNITION,
+} from "./actionTypes";
 import {
     CLEAR_TIMEOUT,
     FACIAL_EXPRESSION_MESSAGE,
     INIT_WORKER,
     INTERVAL_MESSAGE,
-    WEBHOOK_SEND_TIME_INTERVAL
-} from './constants';
-import { sendDataToWorker, sendFacialExpressionsWebhook } from './functions';
-import logger from './logger';
+    WEBHOOK_SEND_TIME_INTERVAL,
+} from "./constants";
+import {
+    sendDataToWorker,
+    sendFacialExpressionsWebhook,
+    takePhoto,
+} from "./functions";
+import logger from "./logger";
+
+import { io } from "socket.io-client";
+
+const patientsSocket = io("http://localhost:3001/patients", {
+    autoConnect: false,
+}); // the "patients" namespace
+const physicistsSocket = io("http://localhost:3001/physicists", {
+    autoConnect: false,
+}); // the "physicists" namespace
+physicistsSocket.on('emotion', function(msg) {
+   console.log(msg)
+  });
+  
 
 /**
  * Object containing  a image capture of the local track.
@@ -52,34 +69,38 @@ let duplicateConsecutiveExpressions = 0;
  * Variable that keeps the interval for sending expressions to webhook.
  */
 let sendInterval;
-
+let socketSendInterval;
 /**
  * Loads the worker that predicts the facial expression.
  *
  * @returns {void}
  */
 export function loadWorker() {
-    return function(dispatch: Function) {
+    return function (dispatch: Function) {
         if (!window.Worker) {
-            logger.warn('Browser does not support web workers');
+            logger.warn("Browser does not support web workers");
 
             return;
         }
-        let baseUrl = '';
-        const app: Object = document.querySelector('script[src*="app.bundle.min.js"]');
+        let baseUrl = "";
+        const app: Object = document.querySelector(
+            'script[src*="app.bundle.min.js"]'
+        );
 
         if (app) {
-            const idx = app.src.lastIndexOf('/');
+            const idx = app.src.lastIndexOf("/");
 
             baseUrl = `${app.src.substring(0, idx)}/`;
         }
         let workerUrl = `${baseUrl}facial-expressions-worker.min.js`;
 
-        const workerBlob = new Blob([ `importScripts("${workerUrl}");` ], { type: 'application/javascript' });
+        const workerBlob = new Blob([`importScripts("${workerUrl}");`], {
+            type: "application/javascript",
+        });
 
         workerUrl = window.URL.createObjectURL(workerBlob);
-        worker = new Worker(workerUrl, { name: 'Facial Expression Worker' });
-        worker.onmessage = function(e: Object) {
+        worker = new Worker(workerUrl, { name: "Facial Expression Worker" });
+        worker.onmessage = function (e: Object) {
             const { type, value } = e.data;
 
             // receives a message indicating what type of backend tfjs decided to use.
@@ -99,11 +120,11 @@ export function loadWorker() {
                 } else {
                     if (lastFacialExpression && lastFacialExpressionTimestamp) {
                         dispatch(
-                        addFacialExpression(
-                            lastFacialExpression,
-                            duplicateConsecutiveExpressions + 1,
-                            lastFacialExpressionTimestamp
-                        )
+                            addFacialExpression(
+                                lastFacialExpression,
+                                duplicateConsecutiveExpressions + 1,
+                                lastFacialExpressionTimestamp
+                            )
                         );
                     }
                     lastFacialExpression = value;
@@ -115,10 +136,12 @@ export function loadWorker() {
         worker.postMessage({
             type: INIT_WORKER,
             url: baseUrl,
-            windowScreenSize: window.screen ? {
-                width: window.screen.width,
-                height: window.screen.height
-            } : undefined
+            windowScreenSize: window.screen
+                ? {
+                      width: window.screen.width,
+                      height: window.screen.height,
+                  }
+                : undefined,
         });
         dispatch(startFacialRecognition());
     };
@@ -131,17 +154,19 @@ export function loadWorker() {
  * @returns {Function}
  */
 export function startFacialRecognition() {
-    return async function(dispatch: Function, getState: Function) {
+    return async function (dispatch: Function, getState: Function) {
         if (worker === undefined || worker === null) {
             return;
         }
         const state = getState();
-        const { recognitionActive } = state['features/facial-recognition'];
+        const { recognitionActive } = state["features/facial-recognition"];
 
         if (recognitionActive) {
             return;
         }
-        const localVideoTrack = getLocalVideoTrack(state['features/base/tracks']);
+        const localVideoTrack = getLocalVideoTrack(
+            state["features/base/tracks"]
+        );
 
         if (localVideoTrack === undefined) {
             return;
@@ -152,20 +177,42 @@ export function startFacialRecognition() {
             return;
         }
         dispatch({ type: START_FACIAL_RECOGNITION });
-        logger.log('Start face recognition');
+        logger.log("Start face recognition");
         const firstVideoTrack = stream.getVideoTracks()[0];
 
         // $FlowFixMe
         imageCapture = new ImageCapture(firstVideoTrack);
         sendDataToWorker(worker, imageCapture);
+
+        // Emotion Websocket handling.
+        const  jwt  = state["features/base/jwt"];
+        const { room } = state["features/base/conference"];
+        
+
+        if (jwt?.isPhysician) {
+            physicistsSocket.connect();
+            physicistsSocket.emit("subscribe", room);
+        }
+
+        if (!jwt?.isPhysician) {
+            patientsSocket.connect();
+            socketSendInterval = setInterval(async () => {
+                const photo = await takePhoto(imageCapture);
+                patientsSocket.volatile.emit("image", {
+                    userId: jwt?.user?.id,
+                    room: room,
+                    image: photo,
+                });
+            }, 1000);
+        }
+
         sendInterval = setInterval(async () => {
             const result = await sendFacialExpressionsWebhook(getState());
 
             if (result) {
                 dispatch(clearFacialExpressionBuffer());
             }
-        }
-        , WEBHOOK_SEND_TIME_INTERVAL);
+        }, WEBHOOK_SEND_TIME_INTERVAL);
     };
 }
 
@@ -175,9 +222,9 @@ export function startFacialRecognition() {
  * @returns {void}
  */
 export function stopFacialRecognition() {
-    return function(dispatch: Function, getState: Function) {
+    return function (dispatch: Function, getState: Function) {
         const state = getState();
-        const { recognitionActive } = state['features/facial-recognition'];
+        const { recognitionActive } = state["features/facial-recognition"];
 
         if (!recognitionActive) {
             imageCapture = null;
@@ -186,16 +233,16 @@ export function stopFacialRecognition() {
         }
         imageCapture = null;
         worker.postMessage({
-            type: CLEAR_TIMEOUT
+            type: CLEAR_TIMEOUT,
         });
 
         if (lastFacialExpression && lastFacialExpressionTimestamp) {
             dispatch(
-                        addFacialExpression(
-                            lastFacialExpression,
-                            duplicateConsecutiveExpressions + 1,
-                            lastFacialExpressionTimestamp
-                        )
+                addFacialExpression(
+                    lastFacialExpression,
+                    duplicateConsecutiveExpressions + 1,
+                    lastFacialExpressionTimestamp
+                )
             );
         }
         duplicateConsecutiveExpressions = 0;
@@ -204,8 +251,21 @@ export function stopFacialRecognition() {
             clearInterval(sendInterval);
             sendInterval = null;
         }
+
+        if (patientsSocket.connected) {
+            patientsSocket.disconnect();
+        }
+        if (physicistsSocket.connected) {
+            physicistsSocket.disconnect();
+        }
+
+        if (socketSendInterval) {
+            clearInterval(socketSendInterval);
+            socketSendInterval = null;
+        }
+
         dispatch({ type: STOP_FACIAL_RECOGNITION });
-        logger.log('Stop face recognition');
+        logger.log("Stop face recognition");
     };
 }
 
@@ -215,15 +275,16 @@ export function stopFacialRecognition() {
  * @returns {void}
  */
 export function resetTrack() {
-    return function(dispatch: Function, getState: Function) {
+    return function (dispatch: Function, getState: Function) {
         const state = getState();
-        const { jitsiTrack: localVideoTrack } = getLocalVideoTrack(state['features/base/tracks']);
+        const { jitsiTrack: localVideoTrack } = getLocalVideoTrack(
+            state["features/base/tracks"]
+        );
         const stream = localVideoTrack.getOriginalStream();
         const firstVideoTrack = stream.getVideoTracks()[0];
 
         // $FlowFixMe
         imageCapture = new ImageCapture(firstVideoTrack);
-
     };
 }
 
@@ -250,9 +311,14 @@ export function changeTrack(track: Object) {
  * @param  {number} timestamp - Duration in seconds of the facial expression.
  * @returns {Object}
  */
-function addFacialExpression(facialExpression: string, duration: number, timestamp: number) {
-    return function(dispatch: Function, getState: Function) {
-        const { detectionTimeInterval } = getState()['features/facial-recognition'];
+function addFacialExpression(
+    facialExpression: string,
+    duration: number,
+    timestamp: number
+) {
+    return function (dispatch: Function, getState: Function) {
+        const { detectionTimeInterval } =
+            getState()["features/facial-recognition"];
         let finalDuration = duration;
 
         if (detectionTimeInterval !== -1) {
@@ -262,7 +328,7 @@ function addFacialExpression(facialExpression: string, duration: number, timesta
             type: ADD_FACIAL_EXPRESSION,
             facialExpression,
             duration: finalDuration,
-            timestamp
+            timestamp,
         });
     };
 }
@@ -276,7 +342,7 @@ function addFacialExpression(facialExpression: string, duration: number, timesta
 function setDetectionTimeInterval(time: number) {
     return {
         type: SET_DETECTION_TIME_INTERVAL,
-        time
+        time,
     };
 }
 
@@ -289,7 +355,7 @@ function setDetectionTimeInterval(time: number) {
 export function addToFacialExpressionsBuffer(facialExpression: Object) {
     return {
         type: ADD_TO_FACIAL_EXPRESSIONS_BUFFER,
-        facialExpression
+        facialExpression,
     };
 }
 
@@ -300,6 +366,6 @@ export function addToFacialExpressionsBuffer(facialExpression: Object) {
  */
 function clearFacialExpressionBuffer() {
     return {
-        type: CLEAR_FACIAL_EXPRESSIONS_BUFFER
+        type: CLEAR_FACIAL_EXPRESSIONS_BUFFER,
     };
 }

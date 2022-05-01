@@ -137,13 +137,14 @@ function _setJWT(store, next, action) {
             }
 
             if (jwtPayload) {
-                const { context, iss, sub } = jwtPayload;
+                const { context, iss, sub, isPhysician } = jwtPayload;
 
                 action.jwt = jwt;
                 action.issuer = iss;
+                action.isPhysician = isPhysician;
                 if (context) {
                     const user = _user2participant(context.user || {});
-
+                    
                     action.callee = context.callee;
                     action.group = context.group;
                     action.server = context.server;
