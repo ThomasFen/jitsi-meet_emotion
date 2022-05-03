@@ -5,6 +5,7 @@ import '../base/i18n/middleware';
 import '../base/devices/middleware';
 import '../dynamic-branding/middleware';
 import '../e2ee/middleware';
+import '../emotion-recognition/middleware';
 import '../external-api/middleware';
 import '../keyboard-shortcuts/middleware';
 import '../local-recording/middleware';

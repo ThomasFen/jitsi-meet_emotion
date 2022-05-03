@@ -3,6 +3,7 @@ import { getLocalVideoTrack } from "../base/tracks";
 
 import "image-capture";
 import "./createImageBitmap";
+import { getRemoteParticipants } from '../base/participants';
 
 import {
     ADD_FACIAL_EXPRESSION,
@@ -159,6 +160,8 @@ export function startFacialRecognition() {
             return;
         }
         const state = getState();
+        let remotes = getRemoteParticipants();
+        console.log(remotes);
         const { recognitionActive } = state["features/facial-recognition"];
 
         if (recognitionActive) {
@@ -194,7 +197,7 @@ export function startFacialRecognition() {
             physicistsSocket.emit("subscribe", room);
         }
 
-        if (!jwt?.isPhysician) {
+        if (jwt?.isPhysician === false) {
             patientsSocket.connect();
             socketSendInterval = setInterval(async () => {
                 const photo = await takePhoto(imageCapture);
