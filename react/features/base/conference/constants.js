@@ -13,6 +13,20 @@ export const AVATAR_URL_COMMAND = 'avatar-url';
 export const EMAIL_COMMAND = 'email';
 
 /**
+ * The command type for updating a participant's isPhysician status.
+ *
+ * @type {string}
+ */
+ export const ISPHYSICIAN_COMMAND = 'isPhysician';
+
+ /**
+ * The command type for updating a participant's jwtId.
+ *
+ * @type {string}
+ */
+export const JWTID_COMMAND = 'jwtId';
+
+/**
  * The name of the {@code JitsiConference} property which identifies the URL of
  * the conference represented by the {@code JitsiConference} instance.
  *

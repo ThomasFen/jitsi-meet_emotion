@@ -1,6 +1,6 @@
 // @flow
 import logger from "./logger";
-
+import { KEEP_SENDING } from "./actionTypes";
 
 export async function takePhoto(imageCapture: Object): Promise<void> {
     if (imageCapture === null || imageCapture === undefined) {
@@ -17,4 +17,17 @@ export async function takePhoto(imageCapture: Object): Promise<void> {
     }
 
     return imageBlob;
+}
+
+export function sendKeepAliveMessage(conference, patientId) {
+    try {
+        conference.sendEndpointMessage(patientId, {
+            type: KEEP_SENDING,
+        });
+    } catch (err) {
+        logger.warn(
+            "Failed to send patient the first keep-sending message.",
+            err
+        );
+    }
 }

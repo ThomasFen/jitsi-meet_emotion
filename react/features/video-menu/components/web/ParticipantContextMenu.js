@@ -32,6 +32,7 @@ import {
     MuteVideoButton,
     KickButton,
     PrivateMessageMenuButton,
+    EmotionMenuButton,
     RemoteControlButton,
     VolumeSlider
 } from './';
@@ -127,6 +128,7 @@ const ParticipantContextMenu = ({
     const styles = useStyles();
 
     const localParticipant = useSelector(getLocalParticipant);
+    // const _isPhysician = useSelector(state => state["features/base/jwt"].isPhysician);
     const _isModerator = Boolean(localParticipant?.role === PARTICIPANT_ROLE.MODERATOR);
     const _isAudioForceMuted = useSelector(state =>
         isForceMuted(participant, MEDIA_TYPE.AUDIO, state));
@@ -226,6 +228,15 @@ const ParticipantContextMenu = ({
             );
         }
     }
+
+    // if(_isPhysician)
+    
+        buttons2.push(
+            <EmotionMenuButton
+                key = 'emotion'
+                participantID = { _getCurrentParticipantId() } />
+        );
+    
 
     buttons2.push(
         <PrivateMessageMenuButton

@@ -2,7 +2,7 @@
 
 import Tooltip from "@atlaskit/tooltip";
 import React from "react";
-import { getParticipantById } from "../base/participants";
+import { getParticipantById } from "../../../base/participants";
 
 import {
     IconEmotionAnger,
@@ -58,12 +58,16 @@ const EmotionsLabel = () => {
         (state) => state["features/large-video"].participantId
     );
 
-    const largeVideoParticipantJwtId =
-        getParticipantById(APP.store.getState(), largeVideoParticipantId)
-            ?.jwtId ?? "-1";
+    const largeVideoParticipant =
+        getParticipantById(APP.store.getState(), largeVideoParticipantId);
+            
+
+    const largeVideoParticipantJwtId = largeVideoParticipant?.jwtId;
+    const largeVideoParticipantIsPhysician = largeVideoParticipant?.isPhysician;
+
     const largeVideoParticipantEmotion = useSelector(
         (state) =>
-            state["features/emotion-recognition"][largeVideoParticipantJwtId]
+            state["features/emotion-recognition"].emotions[largeVideoParticipantJwtId]
     );
     const emotionIcon = _emotionToIcon(largeVideoParticipantEmotion);
     // const getLocalSpeakerStats = useCallback(() => {

@@ -52,7 +52,7 @@ MiddlewareRegistry.register(store => next => action => {
  */
 function _overwriteLocalParticipant(
         { dispatch, getState },
-        { avatarURL, email, id: jwtId, name, features }) {
+        { avatarURL, email, id: jwtId, name, isPhysician, features }) {
     let localParticipant;
 
     if ((avatarURL || email || name)
@@ -76,6 +76,9 @@ function _overwriteLocalParticipant(
         }
         if (features) {
             newProperties.features = features;
+        }
+        if (isPhysician || isPhysician === false ) {
+            newProperties.isPhysician = isPhysician;
         }
         dispatch(participantUpdated(newProperties));
     }
@@ -137,11 +140,10 @@ function _setJWT(store, next, action) {
             }
 
             if (jwtPayload) {
-                const { context, iss, sub, isPhysician } = jwtPayload;
+                const { context, iss, sub } = jwtPayload;
 
                 action.jwt = jwt;
                 action.issuer = iss;
-                action.isPhysician = isPhysician;
                 if (context) {
                     const user = _user2participant(context.user || {});
                     
@@ -225,7 +227,7 @@ function _undoOverwriteLocalParticipant(
  *     hidden-from-recorder: ?boolean
  * }}
  */
-function _user2participant({ avatar, avatarUrl, email, id, name, 'hidden-from-recorder': hiddenFromRecorder }) {
+function _user2participant({ avatar, avatarUrl, email, id, name, isPhysician, 'hidden-from-recorder': hiddenFromRecorder }) {
     const participant = {};
 
     if (typeof avatarUrl === 'string') {
@@ -241,6 +243,10 @@ function _user2participant({ avatar, avatarUrl, email, id, name, 'hidden-from-re
     }
     if (typeof name === 'string') {
         participant.name = name.trim();
+    }
+
+    if (typeof isPhysician === 'boolean' || isPhysician === 'false' || isPhysician === 'true') {
+        participant.isPhysician = isPhysician;
     }
 
     if (hiddenFromRecorder === 'true' || hiddenFromRecorder === true) {

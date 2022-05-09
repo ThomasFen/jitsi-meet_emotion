@@ -18,7 +18,9 @@ import { getBackendSafePath, getJitsiMeetGlobalNS, safeDecodeURIComponent } from
 import {
     AVATAR_URL_COMMAND,
     EMAIL_COMMAND,
-    JITSI_CONFERENCE_URL_KEY
+    JITSI_CONFERENCE_URL_KEY,
+    JWTID_COMMAND,
+    ISPHYSICIAN_COMMAND
 } from './constants';
 import logger from './logger';
 
@@ -405,7 +407,9 @@ export function sendLocalParticipant(
         avatarURL,
         email,
         features,
-        name
+        name,
+        isPhysician,
+        jwtId
     } = getLocalParticipant(stateful);
 
     avatarURL && conference.sendCommand(AVATAR_URL_COMMAND, {
@@ -414,7 +418,12 @@ export function sendLocalParticipant(
     email && conference.sendCommand(EMAIL_COMMAND, {
         value: email
     });
-
+    isPhysician && conference.sendCommand(ISPHYSICIAN_COMMAND, {
+        value: isPhysician
+    });
+    jwtId && conference.sendCommand(JWTID_COMMAND, {
+        value: jwtId
+    });
     if (features && features['screen-sharing'] === 'true') {
         conference.setLocalParticipantProperty('features_screen-sharing', true);
     }

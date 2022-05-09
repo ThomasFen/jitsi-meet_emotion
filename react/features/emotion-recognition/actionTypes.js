@@ -4,12 +4,36 @@
  * Redux action type dispatched in order to add a emotion expression.
  *
  * {
- *      type: ADD_EMOTION_EXPRESSION,
- *      emotionExpression: string,
- *      duration: number
+ *      type: ADD_EMOTION,
+ *      emotion: string,
+ *      patientId: string
  * }
  */
  export const ADD_EMOTION = 'ADD_EMOTION';
+
+   /**
+  * Redux action type dispatched in order to remove the emotion
+  * of a patient.
+  *
+  * {
+  *      type: DELETE_EMOTION,
+  *      patientId: string
+  * }
+  */
+
+ export const DELETE_EMOTION = 'DELETE_EMOTION';
+
+  /**
+  * Redux action type dispatched in order to set the timestamp when the last
+  * last time a physician requested a patient to keep sending photos to socketIO.
+  *
+  * {
+  *      type: KEEP_SENDING,
+  *      timestamp: number
+  * }
+  */
+
+ export const KEEP_SENDING = 'KEEP_SENDING';
 
  /**
   * Redux action type dispatched in order to set the time interval in which
