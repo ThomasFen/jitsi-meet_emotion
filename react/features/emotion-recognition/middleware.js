@@ -5,7 +5,11 @@ import {
     CONFERENCE_WILL_LEAVE,
     getCurrentConference,
 } from "../base/conference";
-import { getLocalParticipant } from "../base/participants";
+import {
+    getLocalParticipant,
+    getParticipantById,
+    PARTICIPANT_LEFT,
+} from "../base/participants";
 import { MiddlewareRegistry } from "../base/redux";
 import { TRACK_UPDATED, TRACK_ADDED, TRACK_REMOVED } from "../base/tracks";
 import { VIRTUAL_BACKGROUND_TRACK_CHANGED } from "../virtual-background/actionTypes";
@@ -16,11 +20,10 @@ import {
     stopEmotionRecognition,
     startEmotionRecognition,
     keepSending,
+    deleteEmotion,
 } from "./actions";
 import { KEEP_SENDING } from "./actionTypes";
-import {
-    ENDPOINT_MESSAGE_RECEIVED,
-} from '../subtitles/actionTypes';
+import { ENDPOINT_MESSAGE_RECEIVED } from "../subtitles/actionTypes";
 
 MiddlewareRegistry.register(({ dispatch, getState }) => (next) => (action) => {
     const state = getState();
@@ -48,12 +51,16 @@ MiddlewareRegistry.register(({ dispatch, getState }) => (next) => (action) => {
             return next(action);
         }
         case ENDPOINT_MESSAGE_RECEIVED: {
-            return _endpointMessageReceived(store, next, action);
+            return _endpointMessageReceived(
+                { dispatch, getState },
+                next,
+                action
+            );
         }
 
         case TRACK_UPDATED: {
-    const state = getState();
-    const { isPhysician } = getLocalParticipant(state);
+            const state = getState();
+            const { isPhysician } = getLocalParticipant(state);
             const { videoType, type } = action.track.jitsiTrack;
 
             if (videoType === "camera" && isPhysician === false) {
@@ -102,6 +109,19 @@ MiddlewareRegistry.register(({ dispatch, getState }) => (next) => (action) => {
 
             return next(action);
         }
+        case PARTICIPANT_LEFT: {
+            if (!action.participant.local) {
+                const { isPhysician, jwtId } = getParticipantById(
+                    getState(),
+                    action.participant.id
+                );
+
+                if (!isPhysician) {
+                    dispatch(deleteEmotion(jwtId));
+                }
+            }
+            return next(action);
+        }
         case VIRTUAL_BACKGROUND_TRACK_CHANGED: {
             const state = getState();
             const { isPhysician } = getLocalParticipant(state);
@@ -132,10 +152,10 @@ MiddlewareRegistry.register(({ dispatch, getState }) => (next) => (action) => {
  */
 function _endpointMessageReceived({ dispatch, getState }, next, action) {
     const { json } = action;
-
     if (!(json && json.type === KEEP_SENDING)) {
         return next(action);
     }
+    console.log("Received keep-sending message.");
 
     dispatch(keepSending());
 

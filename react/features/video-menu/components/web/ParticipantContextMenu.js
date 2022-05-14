@@ -1,26 +1,36 @@
 // @flow
 
-import { makeStyles } from '@material-ui/styles';
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from "@material-ui/styles";
+import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
 
-import { Avatar } from '../../../base/avatar';
-import ContextMenu from '../../../base/components/context-menu/ContextMenu';
-import ContextMenuItemGroup from '../../../base/components/context-menu/ContextMenuItemGroup';
-import { isIosMobileBrowser, isMobileBrowser } from '../../../base/environment/utils';
-import { IconShareVideo } from '../../../base/icons';
-import { MEDIA_TYPE } from '../../../base/media';
-import { getLocalParticipant, PARTICIPANT_ROLE } from '../../../base/participants';
-import { getBreakoutRooms, getCurrentRoomId, isInBreakoutRoom } from '../../../breakout-rooms/functions';
-import { setVolume } from '../../../filmstrip/actions.web';
-import { isForceMuted } from '../../../participants-pane/functions';
-import { requestRemoteControl, stopController } from '../../../remote-control';
-import { stopSharedVideo } from '../../../shared-video/actions.any';
-import { showOverflowDrawer } from '../../../toolbox/functions.web';
+import { Avatar } from "../../../base/avatar";
+import ContextMenu from "../../../base/components/context-menu/ContextMenu";
+import ContextMenuItemGroup from "../../../base/components/context-menu/ContextMenuItemGroup";
+import {
+    isIosMobileBrowser,
+    isMobileBrowser,
+} from "../../../base/environment/utils";
+import { IconShareVideo } from "../../../base/icons";
+import { MEDIA_TYPE } from "../../../base/media";
+import {
+    getLocalParticipant,
+    PARTICIPANT_ROLE,
+} from "../../../base/participants";
+import {
+    getBreakoutRooms,
+    getCurrentRoomId,
+    isInBreakoutRoom,
+} from "../../../breakout-rooms/functions";
+import { setVolume } from "../../../filmstrip/actions.web";
+import { isForceMuted } from "../../../participants-pane/functions";
+import { requestRemoteControl, stopController } from "../../../remote-control";
+import { stopSharedVideo } from "../../../shared-video/actions.any";
+import { showOverflowDrawer } from "../../../toolbox/functions.web";
 
-import { REMOTE_CONTROL_MENU_STATES } from './RemoteControlButton';
-import SendToRoomButton from './SendToRoomButton';
+import { REMOTE_CONTROL_MENU_STATES } from "./RemoteControlButton";
+import SendToRoomButton from "./SendToRoomButton";
 
 import {
     AskToUnmuteButton,
@@ -34,11 +44,10 @@ import {
     PrivateMessageMenuButton,
     EmotionMenuButton,
     RemoteControlButton,
-    VolumeSlider
-} from './';
+    VolumeSlider,
+} from "./";
 
 type Props = {
-
     /**
      * Class name for the context menu.
      */
@@ -93,20 +102,20 @@ type Props = {
     /**
      * Whether or not the menu is displayed in the thumbnail remote video menu.
      */
-    thumbnailMenu: ?boolean
-}
+    thumbnailMenu: ?boolean,
+};
 
-const useStyles = makeStyles(theme => {
+const useStyles = makeStyles((theme) => {
     return {
         text: {
             color: theme.palette.text02,
-            padding: '10px 16px',
-            height: '40px',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            boxSizing: 'border-box'
-        }
+            padding: "10px 16px",
+            height: "40px",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            boxSizing: "border-box",
+        },
     };
 });
 
@@ -121,134 +130,163 @@ const ParticipantContextMenu = ({
     onSelect,
     participant,
     remoteControlState,
-    thumbnailMenu
+    thumbnailMenu,
 }: Props) => {
     const dispatch = useDispatch();
     const { t } = useTranslation();
     const styles = useStyles();
 
     const localParticipant = useSelector(getLocalParticipant);
-    // const _isPhysician = useSelector(state => state["features/base/jwt"].isPhysician);
-    const _isModerator = Boolean(localParticipant?.role === PARTICIPANT_ROLE.MODERATOR);
-    const _isAudioForceMuted = useSelector(state =>
-        isForceMuted(participant, MEDIA_TYPE.AUDIO, state));
-    const _isVideoForceMuted = useSelector(state =>
-        isForceMuted(participant, MEDIA_TYPE.VIDEO, state));
+    const _isModerator = Boolean(
+        localParticipant?.role === PARTICIPANT_ROLE.MODERATOR
+    );
+    const _isAudioForceMuted = useSelector((state) =>
+        isForceMuted(participant, MEDIA_TYPE.AUDIO, state)
+    );
+    const _isVideoForceMuted = useSelector((state) =>
+        isForceMuted(participant, MEDIA_TYPE.VIDEO, state)
+    );
     const _overflowDrawer = useSelector(showOverflowDrawer);
-    const { remoteVideoMenu = {}, disableRemoteMute, startSilent }
-        = useSelector(state => state['features/base/config']);
+    const {
+        remoteVideoMenu = {},
+        disableRemoteMute,
+        startSilent,
+    } = useSelector((state) => state["features/base/config"]);
     const { disableKick, disableGrantModerator } = remoteVideoMenu;
-    const { participantsVolume } = useSelector(state => state['features/filmstrip']);
-    const _volume = (participant?.local ?? true ? undefined
-        : participant?.id ? participantsVolume[participant?.id] : undefined) ?? 1;
+    const { participantsVolume } = useSelector(
+        (state) => state["features/filmstrip"]
+    );
+    const _volume =
+        (participant?.local ?? true
+            ? undefined
+            : participant?.id
+            ? participantsVolume[participant?.id]
+            : undefined) ?? 1;
     const isBreakoutRoom = useSelector(isInBreakoutRoom);
 
     const _currentRoomId = useSelector(getCurrentRoomId);
     const _rooms = Object.values(useSelector(getBreakoutRooms));
 
-    const _onVolumeChange = useCallback(value => {
-        dispatch(setVolume(participant.id, value));
-    }, [ setVolume, dispatch ]);
+    const _onVolumeChange = useCallback(
+        (value) => {
+            dispatch(setVolume(participant.id, value));
+        },
+        [setVolume, dispatch]
+    );
 
-    const clickHandler = useCallback(() => onSelect(true), [ onSelect ]);
+    const clickHandler = useCallback(() => onSelect(true), [onSelect]);
 
     const _onStopSharedVideo = useCallback(() => {
         clickHandler();
         dispatch(stopSharedVideo());
-    }, [ stopSharedVideo ]);
+    }, [stopSharedVideo]);
 
     const _getCurrentParticipantId = useCallback(() => {
         const drawer = _overflowDrawer && !thumbnailMenu;
 
-        return (drawer ? drawerParticipant?.participantID : participant?.id) ?? '';
-    }
-    , [ thumbnailMenu, _overflowDrawer, drawerParticipant, participant ]);
+        return (
+            (drawer ? drawerParticipant?.participantID : participant?.id) ?? ""
+        );
+    }, [thumbnailMenu, _overflowDrawer, drawerParticipant, participant]);
 
     const buttons = [];
     const buttons2 = [];
 
-    const showVolumeSlider = !startSilent
-        && !isIosMobileBrowser()
-        && (_overflowDrawer || thumbnailMenu)
-        && typeof _volume === 'number'
-        && !isNaN(_volume);
+    const showVolumeSlider =
+        !startSilent &&
+        !isIosMobileBrowser() &&
+        (_overflowDrawer || thumbnailMenu) &&
+        typeof _volume === "number" &&
+        !isNaN(_volume);
 
-    const fakeParticipantActions = [ {
-        accessibilityLabel: t('toolbar.stopSharedVideo'),
-        icon: IconShareVideo,
-        onClick: _onStopSharedVideo,
-        text: t('toolbar.stopSharedVideo')
-    } ];
+    const fakeParticipantActions = [
+        {
+            accessibilityLabel: t("toolbar.stopSharedVideo"),
+            icon: IconShareVideo,
+            onClick: _onStopSharedVideo,
+            text: t("toolbar.stopSharedVideo"),
+        },
+    ];
 
     if (_isModerator) {
         if (thumbnailMenu || _overflowDrawer) {
-            buttons.push(<AskToUnmuteButton
-                isAudioForceMuted = { _isAudioForceMuted }
-                isVideoForceMuted = { _isVideoForceMuted }
-                key = 'ask-unmute'
-                participantID = { _getCurrentParticipantId() } />
+            buttons.push(
+                <AskToUnmuteButton
+                    isAudioForceMuted={_isAudioForceMuted}
+                    isVideoForceMuted={_isVideoForceMuted}
+                    key="ask-unmute"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
         }
         if (!disableRemoteMute) {
             buttons.push(
                 <MuteButton
-                    key = 'mute'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="mute"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
             buttons.push(
                 <MuteEveryoneElseButton
-                    key = 'mute-others'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="mute-others"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
             buttons.push(
                 <MuteVideoButton
-                    key = 'mute-video'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="mute-video"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
             buttons.push(
                 <MuteEveryoneElsesVideoButton
-                    key = 'mute-others-video'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="mute-others-video"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
         }
 
         if (!disableGrantModerator && !isBreakoutRoom) {
             buttons2.push(
                 <GrantModeratorButton
-                    key = 'grant-moderator'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="grant-moderator"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
         }
 
         if (!disableKick) {
             buttons2.push(
                 <KickButton
-                    key = 'kick'
-                    participantID = { _getCurrentParticipantId() } />
+                    key="kick"
+                    participantID={_getCurrentParticipantId()}
+                />
             );
         }
     }
 
-    // if(_isPhysician)
-    
+    if (localParticipant.isPhysician) {
         buttons2.push(
             <EmotionMenuButton
-                key = 'emotion'
-                participantID = { _getCurrentParticipantId() } />
+                key="emotion"
+                participantID={_getCurrentParticipantId()}
+            />
         );
-    
+    }
 
     buttons2.push(
         <PrivateMessageMenuButton
-            key = 'privateMessage'
-            participantID = { _getCurrentParticipantId() } />
+            key="privateMessage"
+            participantID={_getCurrentParticipantId()}
+        />
     );
 
     if (thumbnailMenu && isMobileBrowser()) {
         buttons2.push(
             <ConnectionStatusButton
-                key = 'conn-status'
-                participantId = { _getCurrentParticipantId() } />
+                key="conn-status"
+                participantId={_getCurrentParticipantId()}
+            />
         );
     }
 
@@ -257,16 +295,20 @@ const ParticipantContextMenu = ({
 
         if (remoteControlState === REMOTE_CONTROL_MENU_STATES.STARTED) {
             onRemoteControlToggle = () => dispatch(stopController(true));
-        } else if (remoteControlState === REMOTE_CONTROL_MENU_STATES.NOT_STARTED) {
-            onRemoteControlToggle = () => dispatch(requestRemoteControl(_getCurrentParticipantId()));
+        } else if (
+            remoteControlState === REMOTE_CONTROL_MENU_STATES.NOT_STARTED
+        ) {
+            onRemoteControlToggle = () =>
+                dispatch(requestRemoteControl(_getCurrentParticipantId()));
         }
 
         buttons2.push(
             <RemoteControlButton
-                key = 'remote-control'
-                onClick = { onRemoteControlToggle }
-                participantID = { _getCurrentParticipantId() }
-                remoteControlState = { remoteControlState } />
+                key="remote-control"
+                onClick={onRemoteControlToggle}
+                participantID={_getCurrentParticipantId()}
+                remoteControlState={remoteControlState}
+            />
         );
     }
 
@@ -277,10 +319,11 @@ const ParticipantContextMenu = ({
             if (room.id !== _currentRoomId) {
                 breakoutRoomsButtons.push(
                     <SendToRoomButton
-                        key = { room.id }
-                        onClick = { clickHandler }
-                        participantID = { _getCurrentParticipantId() }
-                        room = { room } />
+                        key={room.id}
+                        onClick={clickHandler}
+                        participantID={_getCurrentParticipantId()}
+                        room={room}
+                    />
                 );
             }
         });
@@ -288,49 +331,58 @@ const ParticipantContextMenu = ({
 
     return (
         <ContextMenu
-            className = { className }
-            entity = { participant }
-            hidden = { thumbnailMenu ? false : undefined }
-            inDrawer = { thumbnailMenu && _overflowDrawer }
-            isDrawerOpen = { drawerParticipant }
-            offsetTarget = { offsetTarget }
-            onClick = { onSelect }
-            onDrawerClose = { thumbnailMenu ? onSelect : closeDrawer }
-            onMouseEnter = { onEnter }
-            onMouseLeave = { onLeave }>
-            {!thumbnailMenu && _overflowDrawer && drawerParticipant && <ContextMenuItemGroup
-                actions = { [ {
-                    accessibilityLabel: drawerParticipant.displayName,
-                    customIcon: <Avatar
-                        participantId = { drawerParticipant.participantID }
-                        size = { 20 } />,
-                    text: drawerParticipant.displayName
-                } ] } />}
-            {participant?.isFakeParticipant ? localVideoOwner && (
+            className={className}
+            entity={participant}
+            hidden={thumbnailMenu ? false : undefined}
+            inDrawer={thumbnailMenu && _overflowDrawer}
+            isDrawerOpen={drawerParticipant}
+            offsetTarget={offsetTarget}
+            onClick={onSelect}
+            onDrawerClose={thumbnailMenu ? onSelect : closeDrawer}
+            onMouseEnter={onEnter}
+            onMouseLeave={onLeave}
+        >
+            {!thumbnailMenu && _overflowDrawer && drawerParticipant && (
                 <ContextMenuItemGroup
-                    actions = { fakeParticipantActions } />
+                    actions={[
+                        {
+                            accessibilityLabel: drawerParticipant.displayName,
+                            customIcon: (
+                                <Avatar
+                                    participantId={
+                                        drawerParticipant.participantID
+                                    }
+                                    size={20}
+                                />
+                            ),
+                            text: drawerParticipant.displayName,
+                        },
+                    ]}
+                />
+            )}
+            {participant?.isFakeParticipant ? (
+                localVideoOwner && (
+                    <ContextMenuItemGroup actions={fakeParticipantActions} />
+                )
             ) : (
                 <>
                     {buttons.length > 0 && (
-                        <ContextMenuItemGroup>
-                            {buttons}
-                        </ContextMenuItemGroup>
+                        <ContextMenuItemGroup>{buttons}</ContextMenuItemGroup>
                     )}
-                    <ContextMenuItemGroup>
-                        {buttons2}
-                    </ContextMenuItemGroup>
+                    <ContextMenuItemGroup>{buttons2}</ContextMenuItemGroup>
                     {showVolumeSlider && (
                         <ContextMenuItemGroup>
                             <VolumeSlider
-                                initialValue = { _volume }
-                                key = 'volume-slider'
-                                onChange = { _onVolumeChange } />
+                                initialValue={_volume}
+                                key="volume-slider"
+                                onChange={_onVolumeChange}
+                            />
                         </ContextMenuItemGroup>
                     )}
                     {breakoutRoomsButtons.length > 0 && (
                         <ContextMenuItemGroup>
-                            <div className = { styles.text }>
-                                {t('breakoutRooms.actions.sendToBreakoutRoom')}
+                            <div className={styles.text}>
+                                {t("breakoutRooms.actions.sendToBreakoutRoom")}
                             </div>
                             {breakoutRoomsButtons}
                         </ContextMenuItemGroup>

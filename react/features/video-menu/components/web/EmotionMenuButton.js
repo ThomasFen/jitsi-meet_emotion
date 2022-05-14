@@ -4,8 +4,11 @@ import React, { Component } from "react";
 
 import ContextMenuItem from "../../../base/components/context-menu/ContextMenuItem";
 import { translate } from "../../../base/i18n";
-import { IconMessage, IconCloseCircle } from "../../../base/icons";
+import { IconMessage, IconCloseCircle, IconEmotionEnable } from "../../../base/icons";
 import { connect } from "../../../base/redux";
+import {
+    getParticipantById,
+} from "../../../base/participants";
 import { openChat } from "../../../chat/";
 import {
     _mapStateToProps as _abstractMapStateToProps,
@@ -60,12 +63,12 @@ class EmotionMenuButton extends Component<Props> {
                 accessibilityLabel={t(
                     "toolbar.accessibilityLabel.privateMessage"
                 )}
-                icon={_emotionActive ? IconCloseCircle : IconMessage}
+                icon={_emotionActive ? IconCloseCircle : IconEmotionEnable}
                 onClick={this._onClick}
                 text={
                     _emotionActive
-                        ? "Stop Detecting Emotions"
-                        : "Start Detecting Emotions"
+                        ? "Stop detecting emotions"
+                        : "Start detecting emotions"
                 }
             />
         );
@@ -102,7 +105,7 @@ function _mapStateToProps(state: Object, ownProps: Props): $Shape<Props> {
 
     return {
         _emotionActive: emotions[participant.jwtId],
-        _hidden: enableEmotionRecognition,
+        _hidden: !enableEmotionRecognition,
         _participant: participant,
 
     };

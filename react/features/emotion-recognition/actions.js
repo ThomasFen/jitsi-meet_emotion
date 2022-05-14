@@ -37,7 +37,7 @@ let keepAliveInterval;
 
 let patientsSocket;
 
-let physicianSocket;
+let physiciansSocket;
 
 let jwtIdToId = {};
 
@@ -46,7 +46,7 @@ export function subscribeToAllEmotions() {
         const state = getState();
         const remoteParticipants = getRemoteParticipants(state);
         for (const participant of remoteParticipants) {
-            logger.assert(
+            console.assert(
                 typeof participant[1].isPhysician === "boolean",
                 "isPhysician is not boolean."
             );
@@ -62,10 +62,7 @@ export function unsubscribeAllEmotions() {
         const state = getState();
         const { emotions } = state["features/emotion-recognition"];
         for (const jwtId in emotions) {
-            const patient = getParticipantById(
-                state,
-                jwtIdToId[jwtId]
-            );
+            const patient = getParticipantById(state, jwtIdToId[jwtId]);
 
             disableParticipantEmotions(patient);
         }
@@ -80,13 +77,13 @@ export function enableParticipantEmotions(participant) {
         const conference = getCurrentConference(state);
         const jwtId = participant.jwtId;
         const patientId = participant.id;
-        logger.assert(jwtId, "Participant has no jwtId.");
-        if (!physicianSocket.connected) {
-            physicianSocket.connect();
+        console.assert(jwtId, "Participant has no jwtId.");
+        if (!physiciansSocket.connected) {
+            physiciansSocket.connect();
         }
 
         if (jwtId) {
-            physicianSocket.emit("subscribe", jwtId);
+            physiciansSocket.emit("subscribe", jwtId);
             dispatch(addEmotion(jwtId, "-1"));
             jwtIdToId[jwtId] = patientId;
             sendKeepAliveMessage(conference, patientId);
@@ -101,12 +98,12 @@ export function disableParticipantEmotions(participant) {
         const state = getState();
         const conference = getCurrentConference(state);
         const { emotions } = state["features/emotion-recognition"];
-        logger.assert(participant.jwtId, "Participant has no jwtId.");
+        console.assert(participant.jwtId, "Participant has no jwtId.");
         dispatch(deleteEmotion(participant.jwtId));
         if (Object.keys(emotions).length === 0) {
-            physicianSocket.disconnect();
+            physiciansSocket.disconnect();
         } else if (participant.jwtId) {
-            physicianSocket.emit("unsubscribe", participant.jwtId);
+            physiciansSocket.emit("unsubscribe", participant.jwtId);
         }
     };
 }
@@ -116,7 +113,7 @@ export function disableParticipantEmotions(participant) {
 export function startEmotionRecognition() {
     return async function (dispatch: Function, getState: Function) {
         const state = getState();
-        const { recognitionActive, emotions } =
+        const { recognitionActive } =
             state["features/emotion-recognition"];
         const { emotionUrl } = state["features/base/config"];
         // const jwt = state["features/base/jwt"];
@@ -127,22 +124,10 @@ export function startEmotionRecognition() {
             return;
         }
 
-        if (typeof isPhysician !== 'boolean') {
+        if (typeof isPhysician !== "boolean") {
             logger.warn(
                 "Failed to start emotion-recognition feature. User is not a patient or a physician"
             );
-            return;
-        }
-        const localVideoTrack = getLocalVideoTrack(
-            state["features/base/tracks"]
-        );
-
-        if (localVideoTrack === undefined && !isPhysician) {
-            return;
-        }
-        const stream = localVideoTrack.jitsiTrack.getOriginalStream();
-
-        if (stream === null && !isPhysician) {
             return;
         }
 
@@ -150,13 +135,14 @@ export function startEmotionRecognition() {
         logger.log("Start emotion recognition feature");
 
         if (isPhysician) {
-            physicianSocket = io(`${emotionUrl}/physicists`, {
+            physiciansSocket = io(`${emotionUrl}/physicians`, {
                 autoConnect: false,
             });
 
             /* Listens to subscribed emotions on socketIO and adds them to state. */
 
-            physicianSocket.on("emotion", function (msg) {
+            physiciansSocket.on("emotion", function (msg) {
+                const { emotions } = getState()["features/emotion-recognition"];
                 const emotion = JSON.parse(msg);
                 const emotionIsSubscribed = emotions.hasOwnProperty(
                     emotion.userId
@@ -175,13 +161,15 @@ export function startEmotionRecognition() {
             /* Rejoins patient's socketIO-rooms when a socket disconnect was not explicit.
         This will continue the reception of their emotions.  */
 
-            physicianSocket.on("disconnect", (reason) => {
+            physiciansSocket.on("disconnect", (reason) => {
+                const { emotions } = getState()["features/emotion-recognition"];
+
                 if (
                     reason !== "io server disconnect" &&
                     reason !== "io client disconnect"
                 ) {
                     for (const patientJwtId in emotions) {
-                        physicianSocket.emit("subscribe", patientJwtId);
+                        physiciansSocket.emit("subscribe", patientJwtId);
                     }
                 }
             });
@@ -198,12 +186,21 @@ export function startEmotionRecognition() {
                 }
             }, 50000);
         } else {
-            patientsSocket = io(`${emotionUrl}/physicists`, {
+            patientsSocket = io(`${emotionUrl}/patients`, {
                 autoConnect: false,
             });
-            const firstVideoTrack = stream.getVideoTracks()[0];
-            // $FlowFixMe
-            imageCapture = new ImageCapture(firstVideoTrack);
+            const localVideoTrack = getLocalVideoTrack(
+                state["features/base/tracks"]
+            );
+
+            if (localVideoTrack !== undefined) {
+                const stream = localVideoTrack.jitsiTrack.getOriginalStream();
+                if (stream !== null) {
+                    const firstVideoTrack = stream.getVideoTracks()[0];
+                    // $FlowFixMe
+                    imageCapture = new ImageCapture(firstVideoTrack);
+                }
+            }
         }
     };
 }
@@ -222,10 +219,15 @@ export function stopEmotionRecognition() {
         }
         imageCapture = null;
         jwtIdToId = {};
-        patientsSocket.disconnect();
-        physicianSocket.off();
-        physicianSocket.sendBuffer = [];
-        physicianSocket.disconnect();
+        if (patientsSocket) {
+            patientsSocket.disconnect();
+        }
+        if (physiciansSocket) {
+            physiciansSocket.off();
+            physiciansSocket.sendBuffer = [];
+            physiciansSocket.disconnect();
+        }
+
         if (socketSendInterval) {
             clearInterval(socketSendInterval);
             socketSendInterval = null;
@@ -248,6 +250,14 @@ showed interested in them within the last minute. */
 
 export function keepSending() {
     return function (dispatch: Function, getState: Function) {
+        const state = getState();
+        const { conference } = state["features/base/conference"];
+        const localParticipant = getLocalParticipant(state);
+
+        if (!imageCapture || !conference || !localParticipant) {
+            return;
+        }
+
         if (!patientsSocket.connected) {
             patientsSocket.connect();
         }
@@ -255,15 +265,15 @@ export function keepSending() {
             const state = getState();
             const { detectionTimeInterval } =
                 state["features/emotion-recognition"];
-            const { conference } = state["features/base/conference"];
-            const localParticipant = getLocalParticipant(state);
             socketSendInterval = setInterval(async () => {
-                const photo = await takePhoto(imageCapture);
-                patientsSocket.volatile.emit("image", {
-                    userId: localParticipant.jwtId,
-                    room: conference.sessionId,
-                    image: photo,
-                });
+                if (imageCapture) {
+                    const photo = await takePhoto(imageCapture);
+                    patientsSocket.volatile.emit("image", {
+                        userId: localParticipant.jwtId,
+                        room: conference.sessionId,
+                        image: photo,
+                    });
+                }
             }, detectionTimeInterval);
         }
         if (!shouldSendInterval) {
@@ -276,6 +286,9 @@ export function keepSending() {
                     if (socketSendInterval) {
                         clearInterval(socketSendInterval);
                         socketSendInterval = null;
+                    }
+                    if (patientsSocket) {
+                        patientsSocket.disconnect();
                     }
                 }
             }, 60000);
@@ -338,7 +351,7 @@ function addEmotion(patientId, emotion) {
 
 /* Effectively unsubscribes from a patient by removing his token userId (jwtId)  from state. */
 
-function deleteEmotion(patientId) {
+export function deleteEmotion(patientId) {
     return function (dispatch: Function, getState: Function) {
         dispatch({
             type: DELETE_EMOTION,
