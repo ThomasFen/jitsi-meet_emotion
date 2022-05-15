@@ -1,28 +1,18 @@
 /* @flow */
 
-import { makeStyles } from '@material-ui/styles';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import { makeStyles } from "@material-ui/styles";
+import React from "react";
+import { useSelector } from "react-redux";
 import { COLORS } from "../../../base/label/constants";
-import {
-    IconEmotionAnger,
-    IconEmotionContempt,
-    IconEmotionHappy,
-    IconEmotionDisgust,
-    IconEmotionFear,
-    IconEmotionNeutral,
-    IconEmotionSad,
-    IconEmotionSursprise,
-} from "../../../base/icons";
-import { getParticipantById, hasRaisedHand } from '../../../base/participants';
-import { BaseIndicator } from '../../../base/react';
-import BaseTheme from '../../../base/ui/components/BaseTheme';
+import { getParticipantById } from "../../../base/participants";
+import { BaseIndicator } from "../../../base/react";
+import BaseTheme from "../../../base/ui/components/BaseTheme";
+import { emotionToIcon } from "../../../emotion-recognition/functions";
 
 /**
  * The type of the React {@code Component} props of {@link RaisedHandIndicator}.
  */
 type Props = {
-
     /**
      * The font-size for the icon.
      */
@@ -37,19 +27,19 @@ type Props = {
     /**
      * From which side of the indicator the tooltip should appear from.
      */
-    tooltipPosition: string
+    tooltipPosition: string,
 };
 
-const useStyles = makeStyles(theme => {
+const useStyles = makeStyles((theme) => {
     return {
         EmotionIndicator: {
-           // backgroundColor: COLORS.white,
-            padding: '2px',
+            // backgroundColor: COLORS.white,
+            padding: "2px",
             zIndex: 3,
-            display: 'inline-block',
-            borderRadius: '4px',
-            boxSizing: 'border-box'
-        }
+            display: "inline-block",
+            borderRadius: "4px",
+            boxSizing: "border-box",
+        },
     };
 });
 
@@ -61,24 +51,29 @@ const useStyles = makeStyles(theme => {
 const EmotionIndicator = ({
     iconSize,
     participantId,
-    tooltipPosition
+    tooltipPosition,
 }: Props) => {
-    const _raisedHand = hasRaisedHand(useSelector(state =>
-        getParticipantById(state, participantId)));
+    const participantJwtId = 
+        useSelector((state) => getParticipantById(state, participantId))?.jwtId;
+    
+    const participantEmotion = useSelector(
+        (state) =>
+            state["features/emotion-recognition"].emotions[participantJwtId]
+    );
+    const emotionIcon = emotionToIcon(participantEmotion);
     const styles = useStyles();
 
-    // if (!_raisedHand) {
-    //     return null;
-    // }
+   
 
     return (
-        <div className = { styles.EmotionIndicator }>
+        <div className={styles.EmotionIndicator}>
             <BaseIndicator
-                icon = {_raisedHand ?IconEmotionAnger : IconEmotionHappy}
-                iconColor = { BaseTheme.palette.uiBackground }
-                iconSize = { `${iconSize}px` }
-                tooltipKey = 'raisedHand'
-                tooltipPosition = { tooltipPosition } />
+                icon={emotionIcon}
+                iconColor={BaseTheme.palette.uiBackground}
+                iconSize={`${iconSize}px`}
+                tooltipKey="raisedHand"
+                tooltipPosition={tooltipPosition}
+            />
         </div>
     );
 };

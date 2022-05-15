@@ -19,30 +19,9 @@ import { COLORS } from "../../../base/label/constants";
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import BaseTheme from "../../../base/ui/components/BaseTheme";
+import { emotionToIcon } from "../../../emotion-recognition/functions";
 
-function _emotionToIcon(emotion) {
-    switch (emotion) {
-        case "anger":
-            return IconEmotionAnger;
-        case "contempt":
-            return IconEmotionContempt;
-        case "disgust":
-            return IconEmotionDisgust;
-        case "fear":
-            return IconEmotionFear;
-        case "happy":
-            return IconEmotionHappy;
-        case "neutral":
-            return IconEmotionNeutral;
-        case "sad":
-            return IconEmotionSad;
-        case "surprise":
-            return IconEmotionSursprise;
 
-        default:
-            return null;
-    }
-}
 
 const EmotionsLabel = () => {
     // const conference = useSelector(
@@ -69,7 +48,7 @@ const EmotionsLabel = () => {
         (state) =>
             state["features/emotion-recognition"].emotions[largeVideoParticipantJwtId]
     );
-    const emotionIcon = _emotionToIcon(largeVideoParticipantEmotion);
+    const emotionIcon = emotionToIcon(largeVideoParticipantEmotion);
     // const getLocalSpeakerStats = useCallback(() => {
     //     const stats = conference.getSpeakerStats();
 

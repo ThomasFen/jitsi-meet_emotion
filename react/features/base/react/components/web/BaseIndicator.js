@@ -103,7 +103,7 @@ const BaseIndicator = ({
 
     return (
         <div className = { styles.indicator }>
-            <Tooltip
+       {icon &&      <Tooltip
                 content = { t(tooltipKey) }
                 position = { tooltipPosition }>
                 <span
@@ -116,7 +116,7 @@ const BaseIndicator = ({
                         src = { icon }
                         style = { style } />
                 </span>
-            </Tooltip>
+            </Tooltip>}
         </div>
     );
 };
