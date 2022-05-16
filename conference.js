@@ -3394,14 +3394,6 @@ export default {
         room.sendEndpointMessage(to, payload);
     },
 
-    /**
-     * Sends a facial expression as a string and its duration as a number
-     * @param {object} payload - Object containing the {string} facialExpression
-     * and {number} duration
-     */
-    sendFacialExpression(payload) {
-        room.sendFacialExpression(payload);
-    },
 
     /**
      * Adds new listener.

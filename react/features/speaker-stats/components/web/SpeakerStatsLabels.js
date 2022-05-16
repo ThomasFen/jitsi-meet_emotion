@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Tooltip } from '../../../base/tooltip';
-import { FACIAL_EXPRESSION_EMOJIS } from '../../../facial-recognition/constants.js';
+
 
 const useStyles = makeStyles(theme => {
     return {
@@ -25,33 +25,15 @@ const useStyles = makeStyles(theme => {
  */
 type Props = {
 
-    /**
-     * True if the facial recognition is not disabled.
-     */
-    showFacialExpressions: boolean,
+
 };
 
 const SpeakerStatsLabels = (props: Props) => {
     const { t } = useTranslation();
     const classes = useStyles();
-    const FacialExpressionsLabels = () => Object.keys(FACIAL_EXPRESSION_EMOJIS).map(
-            expression => (
-                <div
-                    className = 'expression'
-                    key = { expression }>
-                    <Tooltip
-                        content = { t(`speakerStats.${expression}`) }
-                        position = { 'top' } >
-                        <div>
-                            { FACIAL_EXPRESSION_EMOJIS[expression] }
-                        </div>
 
-                    </Tooltip>
-                </div>
-            )
-    );
     const nameTimeClass = `name-time${
-        props.showFacialExpressions ? ' name-time_expressions-on' : ''
+        ''
     }`;
 
     return (
@@ -66,12 +48,7 @@ const SpeakerStatsLabels = (props: Props) => {
                     { t('speakerStats.speakerTime') }
                 </div>
             </div>
-            {
-                props.showFacialExpressions
-                && <div className = { `expressions ${classes.emojis}` }>
-                    <FacialExpressionsLabels />
-                </div>
-            }
+         
         </div>
     );
 };

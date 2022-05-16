@@ -5,8 +5,7 @@ import {
     INIT_UPDATE_STATS,
     UPDATE_STATS,
     INIT_REORDER_STATS,
-    RESET_SEARCH_CRITERIA,
-    TOGGLE_FACIAL_EXPRESSIONS
+    RESET_SEARCH_CRITERIA
 } from './actionTypes';
 
 /**
@@ -70,13 +69,4 @@ export function resetSearchCriteria() {
     };
 }
 
-/**
- * Toggles the facial expressions grid.
- *
- * @returns {Object}
- */
-export function toggleFacialExpressions() {
-    return {
-        type: TOGGLE_FACIAL_EXPRESSIONS
-    };
-}
+

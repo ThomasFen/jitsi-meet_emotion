@@ -6,14 +6,14 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { Dialog } from '../../../base/dialog';
 import { escapeRegexp } from '../../../base/util';
-import { resetSearchCriteria, toggleFacialExpressions, initSearch } from '../../actions';
+import { resetSearchCriteria, initSearch } from '../../actions';
 import {
     DISPLAY_SWITCH_BREAKPOINT,
     MOBILE_BREAKPOINT,
     RESIZE_SEARCH_SWITCH_CONTAINER_BREAKPOINT
 } from '../../constants';
 
-import FacialExpressionsSwitch from './FacialExpressionsSwitch';
+
 import SpeakerStatsLabels from './SpeakerStatsLabels';
 import SpeakerStatsList from './SpeakerStatsList';
 import SpeakerStatsSearch from './SpeakerStatsSearch';
@@ -55,26 +55,21 @@ const useStyles = makeStyles(theme => {
 });
 
 const SpeakerStats = () => {
-    const { enableDisplayFacialExpressions } = useSelector(state => state['features/base/config']);
-    const { showFacialExpressions } = useSelector(state => state['features/speaker-stats']);
+   
+   
     const { clientWidth } = useSelector(state => state['features/base/responsive-ui']);
-    const displaySwitch = enableDisplayFacialExpressions && clientWidth > DISPLAY_SWITCH_BREAKPOINT;
     const displayLabels = clientWidth > MOBILE_BREAKPOINT;
     const dispatch = useDispatch();
     const classes = useStyles();
 
-    const onToggleFacialExpressions = useCallback(() =>
-        dispatch(toggleFacialExpressions())
-    , [ dispatch ]);
+  
 
     const onSearch = useCallback((criteria = '') => {
         dispatch(initSearch(escapeRegexp(criteria)));
     }
     , [ dispatch ]);
 
-    useEffect(() => {
-        showFacialExpressions && !displaySwitch && dispatch(toggleFacialExpressions());
-    }, [ clientWidth ]);
+
     useEffect(() => () => dispatch(resetSearchCriteria()), []);
 
     return (
@@ -84,32 +79,26 @@ const SpeakerStats = () => {
             hideCancelButton = { true }
             submitDisabled = { true }
             titleKey = 'speakerStats.speakerStats'
-            width = { showFacialExpressions ? '664px' : 'small' }>
+            width = { 'small' }>
             <div className = 'speaker-stats'>
                 <div
                     className = {
                         `${classes.searchSwitchContainer}
-                        ${showFacialExpressions ? classes.searchSwitchContainerExpressionsOn : ''}`
+                        ${''}`
                     }>
                     <div
                         className = {
-                            displaySwitch
-                                ? classes.searchContainer
-                                : classes.searchContainerFullWidth }>
+                           classes.searchContainerFullWidth }>
                         <SpeakerStatsSearch
                             onSearch = { onSearch } />
                     </div>
 
-                    { displaySwitch
-                    && <FacialExpressionsSwitch
-                        onChange = { onToggleFacialExpressions }
-                        showFacialExpressions = { showFacialExpressions } />
-                    }
+              
                 </div>
                 { displayLabels && (
                     <div className = { classes.labelsContainer }>
                         <SpeakerStatsLabels
-                            showFacialExpressions = { showFacialExpressions ?? false } />
+                            />
                         <div className = { classes.separator } />
                     </div>
                 )}

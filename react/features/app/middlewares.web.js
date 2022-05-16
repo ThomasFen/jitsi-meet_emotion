@@ -21,6 +21,5 @@ import '../shared-video/middleware';
 import '../settings/middleware';
 import '../talk-while-muted/middleware';
 import '../virtual-background/middleware';
-import '../facial-recognition/middleware';
 
 import './middlewares.any';

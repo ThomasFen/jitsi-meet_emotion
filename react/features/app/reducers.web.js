@@ -3,7 +3,7 @@
 import '../base/devices/reducer';
 import '../e2ee/reducer';
 import '../emotion-recognition/reducer';
-import '../facial-recognition/reducer';
+
 import '../feedback/reducer';
 import '../local-recording/reducer';
 import '../no-audio-signal/reducer';

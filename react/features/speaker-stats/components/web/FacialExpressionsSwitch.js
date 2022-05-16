@@ -55,7 +55,7 @@ const useStyles = makeStyles(theme => {
 });
 
 /**
- * The type of the React {@code Component} props of {@link ToggleFacialExpressionsButton}.
+ * The type of the React {@code Component} props .
  */
 type Props = {
 
@@ -64,34 +64,6 @@ type Props = {
      */
     onChange: Function,
 
-    /**
-     * The state of the button.
-     */
-    showFacialExpressions: boolean,
 
 };
 
-/**
- * React component for toggling facial expressions grid.
- *
- * @returns {React$Element<any>}
- */
-export default function FacialExpressionsSwitch({ onChange, showFacialExpressions }: Props) {
-    const classes = useStyles();
-    const { t } = useTranslation();
-
-    return (
-        <div className = { classes.switchContainer } >
-            <label
-                className = { classes.switchLabel }
-                htmlFor = 'facial-expressions-switch'>
-                { t('speakerStats.displayEmotions')}
-            </label>
-            <Switch
-                id = 'facial-expressions-switch'
-                onValueChange = { onChange }
-                trackColor = {{ false: 'blue' }}
-                value = { showFacialExpressions } />
-        </div>
-    );
-}
