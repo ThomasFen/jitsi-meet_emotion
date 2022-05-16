@@ -14,6 +14,7 @@ import {
     STOP_EMOTION_RECOGNITION,
     DELETE_EMOTION,
     KEEP_SENDING,
+    INIT_EMOTION,
 } from "./actionTypes";
 import { takePhoto, sendKeepAliveMessage } from "./functions";
 import logger from "./logger";
@@ -84,7 +85,12 @@ export function enableParticipantEmotions(participant) {
 
         if (jwtId) {
             physiciansSocket.emit("subscribe", jwtId);
-            dispatch(addEmotion(jwtId, "-1"));
+            // dispatch(addEmotion(jwtId, ""));
+            dispatch({
+                type: INIT_EMOTION,
+                patientId: jwtId,
+
+            });
             jwtIdToId[jwtId] = patientId;
             sendKeepAliveMessage(conference, patientId);
         }
@@ -341,10 +347,12 @@ function setDetectionTimeInterval(time: number) {
 
 function addEmotion(patientId, emotion) {
     return function (dispatch: Function, getState: Function) {
+        const timestamp = Date.now();
         dispatch({
             type: ADD_EMOTION,
             patientId,
             emotion,
+            timestamp
         });
     };
 }

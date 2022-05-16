@@ -23,6 +23,8 @@
 
  export const DELETE_EMOTION = 'DELETE_EMOTION';
 
+ export const INIT_EMOTION = 'INIT_EMOTION';
+
   /**
   * Redux action type dispatched in order to set the timestamp when the last
   * last time a physician requested a patient to keep sending photos to socketIO.

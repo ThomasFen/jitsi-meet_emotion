@@ -17,7 +17,7 @@ import { getConferenceInfo } from '../functions';
 
 import ConferenceInfoContainer from './ConferenceInfoContainer';
 import InsecureRoomNameLabel from './InsecureRoomNameLabel';
-import EmotionLabel from './EmotionLabel';
+import EmotionLabel from '../../../emotion-recognition/components/web/EmotionLabel';
 import ParticipantsCount from './ParticipantsCount';
 import RaisedHandsCountLabel from './RaisedHandsCountLabel';
 import SubjectText from './SubjectText';

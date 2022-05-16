@@ -3,23 +3,12 @@
 import Tooltip from "@atlaskit/tooltip";
 import React from "react";
 import { getParticipantById } from "../../../base/participants";
-
-import {
-    IconEmotionAnger,
-    IconEmotionContempt,
-    IconEmotionHappy,
-    IconEmotionDisgust,
-    IconEmotionFear,
-    IconEmotionNeutral,
-    IconEmotionSad,
-    IconEmotionSursprise,
-} from "../../../base/icons";
 import { Label } from "../../../base/label";
 import { COLORS } from "../../../base/label/constants";
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
 import BaseTheme from "../../../base/ui/components/BaseTheme";
-import { emotionToIcon } from "../../../emotion-recognition/functions";
+import { emotionToIcon } from "../../functions";
 
 
 

@@ -7,7 +7,7 @@ import { COLORS } from "../../../base/label/constants";
 import { getParticipantById } from "../../../base/participants";
 import { BaseIndicator } from "../../../base/react";
 import BaseTheme from "../../../base/ui/components/BaseTheme";
-import { emotionToIcon } from "../../../emotion-recognition/functions";
+import { emotionToIcon } from "../../functions";
 
 /**
  * The type of the React {@code Component} props of {@link RaisedHandIndicator}.
@@ -32,7 +32,7 @@ type Props = {
 
 const useStyles = makeStyles((theme) => {
     return {
-        EmotionIndicator: {
+        EmotionIndicatorIcon: {
             // backgroundColor: COLORS.white,
             padding: "2px",
             zIndex: 3,
@@ -48,11 +48,12 @@ const useStyles = makeStyles((theme) => {
  *
  * @returns {ReactElement}
  */
-const EmotionIndicator = ({
+const EmotionIndicatorIcon = ({
     iconSize,
     participantId,
     tooltipPosition,
 }: Props) => {
+
     const participantJwtId = 
         useSelector((state) => getParticipantById(state, participantId))?.jwtId;
     
@@ -61,12 +62,13 @@ const EmotionIndicator = ({
             state["features/emotion-recognition"].emotions[participantJwtId]
     );
     const emotionIcon = emotionToIcon(participantEmotion);
+    
     const styles = useStyles();
 
    
 
-    return (
-        <div className={styles.EmotionIndicator}>
+    if(emotionIcon){return (
+        <div className={styles.EmotionIndicatorIcon}>
             <BaseIndicator
                 icon={emotionIcon}
                 iconColor={BaseTheme.palette.uiBackground}
@@ -75,7 +77,7 @@ const EmotionIndicator = ({
                 tooltipPosition={tooltipPosition}
             />
         </div>
-    );
+    );} else {return null;}
 };
 
-export default EmotionIndicator;
+export default EmotionIndicatorIcon;
