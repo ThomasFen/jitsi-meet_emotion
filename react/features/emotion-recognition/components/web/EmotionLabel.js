@@ -38,47 +38,7 @@ const EmotionsLabel = () => {
             state["features/emotion-recognition"].emotions[largeVideoParticipantJwtId]
     );
     const emotionIcon = emotionToIcon(largeVideoParticipantEmotion);
-    // const getLocalSpeakerStats = useCallback(() => {
-    //     const stats = conference.getSpeakerStats();
-
-    //     for (const userId in stats) {
-    //         if (stats[userId]) {
-    //             if (stats[userId].isLocalStats()) {
-    //                 const meString = t('me');
-
-    //                 stats[userId].setDisplayName(
-    //                     localParticipant.name
-    //                         ? `${localParticipant.name} (${meString})`
-    //                         : meString
-    //                 );
-    //                 if (enableDisplayFacialExpressions) {
-    //                     stats[userId].setFacialExpressions(localFacialExpressions);
-    //                 }
-    //             }
-
-    //             if (!stats[userId].getDisplayName()) {
-    //                 stats[userId].setDisplayName(
-    //                     conference.getParticipantById(userId)?.name
-    //                 );
-    //             }
-    //         }
-    //     }
-
-    //     return stats;
-    // });
-
-    // const localSpeakerStats = Object.keys(speakerStats).length === 0 ? getLocalSpeakerStats() : speakerStats;
-    // const userIds = Object.keys(localSpeakerStats).filter(id => localSpeakerStats[id] && !localSpeakerStats[id].hidden);
-    // const dominantSpeaker = userIds.find(userId => localSpeakerStats[userId].isDominantSpeaker());
-    // const dominantSpeakerStats = localSpeakerStats[dominantSpeaker];
-
-    // const localSpeakerStats = speakerStats;
-    // const userIds = Object.keys(localSpeakerStats).filter(
-    //     (id) => localSpeakerStats[id] && !localSpeakerStats[id].hidden
-    // );
-    // const dominantSpeaker = userIds.find((userId) =>
-    //     localSpeakerStats[userId].isDominantSpeaker()
-    // );
+   
 
     if (tileViewEnabled) {
         return null;
