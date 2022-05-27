@@ -36,7 +36,7 @@ ReducerRegistry.register(
                     ...state,
                     emotions: {
                         ...state.emotions,
-                        [action.patientId]: "",
+                        [action.patientId]: "-1",
                     },
                     emotionHistory: {
                         ...state.emotionHistory,

@@ -52,9 +52,9 @@ class EmotionMenuButton extends Component<Props> {
     render() {
         const { t, _hidden, _participant, _emotionActive } = this.props;
         const patientJwtId = _participant.jwtId;
-        const isPhysian = _participant.isPhysian;
+        const isPhysician = _participant.isPhysician;
 
-        if (!patientJwtId || _hidden || isPhysian) {
+        if (!patientJwtId || _hidden || isPhysician) {
             return null;
         }
 
