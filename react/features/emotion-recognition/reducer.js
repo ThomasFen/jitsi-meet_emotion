@@ -24,7 +24,7 @@ const defaultState = {
     emotionHistory: {},
     detectionTimeInterval: 1000,
     recognitionActive: false,
-    lastRequestTimestamp: 0,
+    lastRequestTimestamp: Number.MAX_SAFE_INTEGER,
 };
 
 ReducerRegistry.register(

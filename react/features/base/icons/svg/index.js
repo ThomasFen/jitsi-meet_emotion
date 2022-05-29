@@ -147,3 +147,5 @@ export { default as IconEmotionNeutral } from './emotion-neutral.svg';
 export { default as IconEmotionSad } from './emotion-sad.svg';
 export { default as IconEmotionSursprise } from './emotion-surprise.svg';
 export { default as IconEmotionEnable } from './emotion-enable.svg';
+export { default as IconEmotionRecording } from './recording.svg';
+

@@ -89,7 +89,6 @@ export function enableParticipantEmotions(participant) {
             dispatch({
                 type: INIT_EMOTION,
                 patientId: jwtId,
-
             });
             jwtIdToId[jwtId] = patientId;
             sendKeepAliveMessage(conference, patientId);
@@ -119,8 +118,7 @@ export function disableParticipantEmotions(participant) {
 export function startEmotionRecognition() {
     return async function (dispatch: Function, getState: Function) {
         const state = getState();
-        const { recognitionActive } =
-            state["features/emotion-recognition"];
+        const { recognitionActive } = state["features/emotion-recognition"];
         const { emotionUrl } = state["features/base/config"];
         // const jwt = state["features/base/jwt"];
         // const isPhysician = jwt?.isPhysician;
@@ -296,6 +294,7 @@ export function keepSending() {
                     if (patientsSocket) {
                         patientsSocket.disconnect();
                     }
+                    dispatch({ type: KEEP_SENDING, timestamp: Number.MAX_SAFE_INTEGER });
                 }
             }, 60000);
         }
@@ -352,7 +351,7 @@ function addEmotion(patientId, emotion) {
             type: ADD_EMOTION,
             patientId,
             emotion,
-            timestamp
+            timestamp,
         });
     };
 }

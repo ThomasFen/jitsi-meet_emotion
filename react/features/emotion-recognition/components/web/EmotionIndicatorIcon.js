@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 /**
- * Thumbnail badge showing that the participant would like to speak.
+ * Thumbnail badge showing participant's emotions.
  *
  * @returns {ReactElement}
  */

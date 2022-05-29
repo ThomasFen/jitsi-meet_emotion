@@ -105,27 +105,21 @@ console.log('render');
     // var minutes = Math.floor(time / 60);
     // var seconds = time % 60;
 
-    // scales, memoize for performance
-    const xScale = useMemo(
-        () =>
+    // scales
+    const xScale = 
             scaleBand({
                 range: [0, xMax],
                 round: true,
                 domain: data.map(getEmotion),
                 padding: 0.3,
-            }),
-        [xMax]
-    );
+            })
 
-    const yScale = useMemo(
-        () =>
+    const yScale = 
             scaleLinear({
                 range: [yMax, 0],
                 round: true,
                 domain: [0, Math.max(...data.map(getEmotionFrequency))],
-            }),
-        [yMax]
-    );
+            })
 
     //   const colorScale = scaleOrdinal<string, string>({
     //     domain: data.map(getEmotion),

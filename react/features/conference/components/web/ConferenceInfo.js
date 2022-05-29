@@ -18,6 +18,7 @@ import { getConferenceInfo } from '../functions';
 import ConferenceInfoContainer from './ConferenceInfoContainer';
 import InsecureRoomNameLabel from './InsecureRoomNameLabel';
 import EmotionLabel from '../../../emotion-recognition/components/web/EmotionLabel';
+import SendingLabel from '../../../emotion-recognition/components/web/SendingLabel';
 import ParticipantsCount from './ParticipantsCount';
 import RaisedHandsCountLabel from './RaisedHandsCountLabel';
 import SubjectText from './SubjectText';
@@ -87,7 +88,11 @@ const COMPONENTS = [
     {
         Component: EmotionLabel,
         id: 'emotion'
-    }
+    },
+      {
+        Component: SendingLabel,
+        id: 'sending'
+    },
 ];
 
 /**
