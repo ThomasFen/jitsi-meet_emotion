@@ -44,7 +44,9 @@ export const TOOLBAR_BUTTONS = [
     'stats',
     'tileview',
     'toggle-camera',
-    'videoquality'
+    'videoquality',
+    'allEmotions',
+    'noEmotions'
 ];
 
 /**

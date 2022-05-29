@@ -45,16 +45,15 @@ let jwtIdToId = {};
 export function subscribeToAllEmotions() {
     return function (dispatch: Function, getState: Function) {
         const state = getState();
-        const remoteParticipants = getRemoteParticipants(state);
-        for (const participant of remoteParticipants) {
-            console.assert(
-                typeof participant[1].isPhysician === "boolean",
-                "isPhysician is not boolean."
-            );
-            if (!participant[1].isPhysician) {
-                enableParticipantEmotions(participant[1]);
-            }
-        }
+        const { emotions } = state["features/emotion-recognition"];
+
+        console.assert(
+            typeof participant.isPhysician === "boolean",
+            "isPhysician is not boolean. this should not be the case."
+        );
+        getRemoteParticipants(state).forEach((p) => {
+            !p.isPhysician && !(p.jwtId in emotions)  && enableParticipantEmotions(p);
+        });
     };
 }
 
@@ -294,7 +293,10 @@ export function keepSending() {
                     if (patientsSocket) {
                         patientsSocket.disconnect();
                     }
-                    dispatch({ type: KEEP_SENDING, timestamp: Number.MAX_SAFE_INTEGER });
+                    dispatch({
+                        type: KEEP_SENDING,
+                        timestamp: Number.MAX_SAFE_INTEGER,
+                    });
                 }
             }, 60000);
         }

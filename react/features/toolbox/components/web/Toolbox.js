@@ -92,6 +92,9 @@ import Separator from './Separator';
 import ShareDesktopButton from './ShareDesktopButton';
 import ToggleCameraButton from './ToggleCameraButton';
 import VideoSettingsButton from './VideoSettingsButton';
+import  AllEmotionButton from '../../../emotion-recognition/components/web/AllEmotionButton';
+import  NoEmotionButton from '../../../emotion-recognition/components/web/NoEmotionButton';
+
 
 /**
  * The type of the React {@code Component} props of {@link Toolbox}.
@@ -799,6 +802,18 @@ class Toolbox extends Component<Props> {
             group: 4
         };
 
+        const allEmotions = {
+            key: 'allEmotions',
+            Content: AllEmotionButton,
+            group: 5
+        };
+
+        const noEmotions = {
+            key: 'noEmotions',
+            Content: NoEmotionButton,
+            group: 5
+        };
+
         return {
             microphone,
             camera,
@@ -829,7 +844,9 @@ class Toolbox extends Component<Props> {
             embed,
             feedback,
             download,
-            help
+            help,
+            allEmotions,
+            noEmotions
         };
     }
 

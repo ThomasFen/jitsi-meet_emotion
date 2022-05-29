@@ -618,6 +618,8 @@ var config = {
     //    'tileview',
     //    'toggle-camera',
     //    'videoquality',
+    //    'allEmotions',
+    //    'noEmotions',
     //    '__end'
     // ],
 
