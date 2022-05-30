@@ -94,6 +94,7 @@ import ToggleCameraButton from './ToggleCameraButton';
 import VideoSettingsButton from './VideoSettingsButton';
 import  AllEmotionButton from '../../../emotion-recognition/components/web/AllEmotionButton';
 import  NoEmotionButton from '../../../emotion-recognition/components/web/NoEmotionButton';
+import  EmotionHistoryButton from '../../../emotion-recognition/components/web/EmotionHistoryButton';
 
 
 /**
@@ -814,6 +815,12 @@ class Toolbox extends Component<Props> {
             group: 5
         };
 
+        const emotionHistory = {
+            key: 'emotionHistory',
+            Content: EmotionHistoryButton,
+            group: 5
+        };
+
         return {
             microphone,
             camera,
@@ -846,7 +853,8 @@ class Toolbox extends Component<Props> {
             download,
             help,
             allEmotions,
-            noEmotions
+            noEmotions,
+            emotionHistory
         };
     }
 

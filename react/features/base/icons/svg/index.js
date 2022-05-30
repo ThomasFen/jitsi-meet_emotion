@@ -149,4 +149,6 @@ export { default as IconEmotionSursprise } from './emotion-surprise.svg';
 export { default as IconEmotionEnable } from './emotion-enable.svg';
 export { default as IconEmotionStop } from './emotion_stop.svg';
 export { default as IconEmotionRecording } from './recording.svg';
+export { default as IconEmotionHistory} from './history.svg';
+
 

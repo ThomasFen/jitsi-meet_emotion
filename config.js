@@ -620,6 +620,7 @@ var config = {
     //    'videoquality',
     //    'allEmotions',
     //    'noEmotions',
+    //    'emotionHistory',
     //    '__end'
     // ],
 
