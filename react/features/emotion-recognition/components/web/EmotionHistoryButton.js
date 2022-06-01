@@ -9,6 +9,8 @@ import {
   
 } from '../../../base/participants';
 import {  IconEmotionHistory } from "../../../base/icons";
+import { openHistoryDialog } from '../../actions';
+
 
 type Props = AbstractButtonProps & {
 
@@ -34,6 +36,10 @@ class EmotionHistoryButton extends AbstractButton<Props, *> {
      * @returns {void}
      */
     _handleClick() {
+        const {  dispatch } = this.props;
+
+        dispatch(openHistoryDialog(() => null));
+
     }
 }
 

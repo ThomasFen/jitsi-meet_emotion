@@ -19,6 +19,10 @@ import {
 import { takePhoto, sendKeepAliveMessage } from "./functions";
 import logger from "./logger";
 import { io } from "socket.io-client";
+import { openDialog } from '../base/dialog';
+import  HistoryDialog  from './components/web/HistoryDialog';
+
+
 
 /* Object containing  a image capture of the local track. */
 
@@ -367,4 +371,10 @@ export function deleteEmotion(patientId) {
             patientId,
         });
     };
+}
+
+
+
+ export function openHistoryDialog(onLogout: Function) {
+    return openDialog(HistoryDialog, { onLogout });
 }
