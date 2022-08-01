@@ -86,6 +86,9 @@ const styles = theme => {
         },
         [COLORS.red]: {
             background: theme.palette.actionDanger
+        },
+        [COLORS.transparent]: {
+            background: 'transparent'
         }
     };
 };
@@ -108,6 +111,7 @@ class Label extends AbstractLabel<Props, *> {
             className,
             color,
             icon,
+            iconSize,
             iconColor,
             id,
             onClick,
@@ -127,7 +131,7 @@ class Label extends AbstractLabel<Props, *> {
                 onClick = { onClick }>
                 { icon && <Icon
                     color = { iconColor }
-                    size = '16'
+                    size = { iconSize != null ? iconSize : '16' }
                     src = { icon } /> }
                 { text && <span className = { icon && classes.withIcon }>{text}</span> }
             </div>

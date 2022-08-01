@@ -32,6 +32,7 @@ import {
     MuteVideoButton,
     KickButton,
     PrivateMessageMenuButton,
+    EmotionMenuButton,
     RemoteControlButton,
     VolumeSlider
 } from './';
@@ -224,6 +225,15 @@ const ParticipantContextMenu = ({
                     participantID = { _getCurrentParticipantId() } />
             );
         }
+    }
+    
+    if (localParticipant.isPhysician) {
+        buttons2.push(
+            <EmotionMenuButton
+                key="emotion"
+                participantID={_getCurrentParticipantId()}
+            />
+        );
     }
 
     buttons2.push(

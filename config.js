@@ -599,6 +599,9 @@ var config = {
     //    'tileview',
     //    'toggle-camera',
     //    'videoquality',
+    //    'allEmotions',
+    //    'noEmotions',
+    //    'emotionHistory',
     //    '__end'
     // ],
 

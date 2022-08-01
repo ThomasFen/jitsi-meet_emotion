@@ -25,6 +25,7 @@ export const LABEL_ID_RECORDING = 'recording';
 export const LABEL_ID_STREAMING = 'streaming';
 export const LABEL_ID_TRANSCRIBING = 'transcribing';
 export const LABEL_ID_INSECURE_ROOM_NAME = 'insecure-room-name';
+export const LABEL_ID_EMOTION = 'emotion';
 export const LABEL_ID_RAISED_HANDS_COUNT = 'raised-hands-count';
 
 /**

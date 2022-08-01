@@ -52,7 +52,7 @@ MiddlewareRegistry.register(store => next => action => {
  */
 function _overwriteLocalParticipant(
         { dispatch, getState },
-        { avatarURL, email, id: jwtId, name, features }) {
+        { avatarURL, email, id: jwtId, name, isPhysician, features }) {
     let localParticipant;
 
     if ((avatarURL || email || name)
@@ -76,6 +76,9 @@ function _overwriteLocalParticipant(
         }
         if (features) {
             newProperties.features = features;
+        }
+        if (isPhysician || isPhysician === false ) {
+            newProperties.isPhysician = isPhysician;
         }
         dispatch(participantUpdated(newProperties));
     }
@@ -223,7 +226,7 @@ function _undoOverwriteLocalParticipant(
  *     name: ?string
  * }}
  */
-function _user2participant({ avatar, avatarUrl, email, id, name }) {
+function _user2participant({ avatar, avatarUrl, email, id, name, isPhysician}) {
     const participant = {};
 
     if (typeof avatarUrl === 'string') {
@@ -239,6 +242,9 @@ function _user2participant({ avatar, avatarUrl, email, id, name }) {
     }
     if (typeof name === 'string') {
         participant.name = name.trim();
+    }
+    if (typeof isPhysician === 'boolean' || isPhysician === 'false' || isPhysician === 'true') {
+        participant.isPhysician = isPhysician;
     }
 
     return Object.keys(participant).length ? participant : undefined;

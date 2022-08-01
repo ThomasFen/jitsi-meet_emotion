@@ -12,6 +12,7 @@ import { STATS_POPOVER_POSITION } from '../../constants';
 import { getIndicatorsTooltipPosition } from '../../functions.web';
 
 import RaisedHandIndicator from './RaisedHandIndicator';
+import EmotionIndicator from '../../../emotion-recognition/components/web/EmotionIndicator';
 import StatusIndicators from './StatusIndicators';
 import VideoMenuTriggerButton from './VideoMenuTriggerButton';
 
@@ -109,6 +110,12 @@ const ThumbnailTopIndicators = ({
                     iconSize = { _indicatorIconSize }
                     participantId = { participantId }
                     tooltipPosition = { getIndicatorsTooltipPosition(currentLayout) } />
+                <EmotionIndicator
+                iconSize = { 40 }
+                participantId = { participantId }
+                tooltipPosition = { getIndicatorsTooltipPosition(currentLayout) } 
+                statsPopoverPosition = { STATS_POPOVER_POSITION[currentLayout] }
+                />    
                 {currentLayout !== LAYOUTS.TILE_VIEW && (
                     <div className = { clsx(indicatorsClassName, 'top-indicators') }>
                         <StatusIndicators

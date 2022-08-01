@@ -30,6 +30,8 @@ import { shouldShowModeratedNotification } from './react/features/av-moderation/
 import {
     AVATAR_URL_COMMAND,
     EMAIL_COMMAND,
+    JWTID_COMMAND,
+    ISPHYSICIAN_COMMAND,
     _conferenceWillJoin,
     authStatusChanged,
     commonUserJoinedHandling,
@@ -202,7 +204,9 @@ const commands = {
     AVATAR_URL: AVATAR_URL_COMMAND,
     CUSTOM_ROLE: 'custom-role',
     EMAIL: EMAIL_COMMAND,
-    ETHERPAD: 'etherpad'
+    ETHERPAD: 'etherpad',
+    JWTID: JWTID_COMMAND,
+    ISPHYSICIAN: ISPHYSICIAN_COMMAND
 };
 
 /**
@@ -2331,6 +2335,28 @@ export default {
                         avatarURL: data.value
                     }));
             });
+
+        room.addCommandListener(
+            this.commands.defaults.ISPHYSICIAN,
+            (data, from) => {
+                APP.store.dispatch(
+                    participantUpdated({
+                        conference: room,
+                        id: from,
+                        isPhysician: data.value,
+                    })
+                );
+            }
+        );
+        room.addCommandListener(this.commands.defaults.JWTID, (data, from) => {
+            APP.store.dispatch(
+                participantUpdated({
+                    conference: room,
+                    id: from,
+                    jwtId: data.value,
+                })
+            );
+        });
 
         APP.UI.addListener(UIEvents.NICKNAME_CHANGED,
             this.changeLocalDisplayName.bind(this));
