@@ -17,12 +17,6 @@ import {
 import { Popover } from "../../../base/popover";
 import { connect } from "../../../base/redux";
 import { getTrackByMediaTypeAndParticipant } from "../../../base/tracks";
-import {
-    isParticipantConnectionStatusInactive,
-    isParticipantConnectionStatusInterrupted,
-    isTrackStreamingStatusInactive,
-    isTrackStreamingStatusInterrupted,
-} from "../../../connection-indicator/functions";
 
 import EmotionIndicatorContent from "./EmotionIndicatorContent";
 import EmotionIndicatorIcon from "./EmotionIndicatorIcon";

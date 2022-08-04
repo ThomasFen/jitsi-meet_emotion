@@ -3,6 +3,8 @@
 var config = {
     // Connection
     //
+    enableEmotionRecognition: true,
+    emotionUrl: 'https://socketio:3001',
 
     hosts: {
         // XMPP domain.
