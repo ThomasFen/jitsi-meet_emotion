@@ -156,7 +156,7 @@ export function startEmotionRecognition() {
                 );
                 if (emotionIsSubscribed) {
                     dispatch(
-                        addEmotion(emotion.userId, emotion.emotions.dominant)
+                        addEmotion(emotion.userId, emotion.emotions.dominantEmotion)
                     );
                 } else {
                     logger.warn(
@@ -277,8 +277,8 @@ export function keepSending() {
                     const photo = await takePhoto(imageCapture);
                     patientsSocket.volatile.emit("image", {
                         userId: localParticipant.jwtId,
-                        room: conference.sessionId,
-                        image: photo,
+                        conferenceId: conference.sessionId,
+                        img: photo,
                     });
                 }
             }, detectionTimeInterval);

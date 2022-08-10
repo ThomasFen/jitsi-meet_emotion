@@ -4,7 +4,7 @@ var config = {
     // Connection
     //
     enableEmotionRecognition: true,
-    emotionUrl: 'https://socketio:3001',
+    emotionUrl: 'http://kubernetesnode:30003',
 
     hosts: {
         // XMPP domain.
