@@ -4,8 +4,7 @@ var config = {
     // Connection
     //
     enableEmotionRecognition: true,
-    emotionUrl: 'http://kubernetesnode:30003',
-
+    emotionUrl: 'https://kubernetesnode',
     hosts: {
         // XMPP domain.
         domain: 'jitsi-meet.example.com',
