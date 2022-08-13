@@ -51,12 +51,9 @@ export function subscribeToAllEmotions() {
         const state = getState();
         const { emotions } = state["features/emotion-recognition"];
 
-        console.assert(
-            typeof participant.isPhysician === "boolean",
-            "isPhysician is not boolean. this should not be the case."
-        );
+        
         getRemoteParticipants(state).forEach((p) => {
-            !p.isPhysician && !(p.jwtId in emotions)  && enableParticipantEmotions(p);
+            !p.isPhysician && !(p.jwtId in emotions)  && dispatch(enableParticipantEmotions(p));
         });
     };
 }
@@ -68,7 +65,7 @@ export function unsubscribeAllEmotions() {
         for (const jwtId in emotions) {
             const patient = getParticipantById(state, jwtIdToId[jwtId]);
 
-            disableParticipantEmotions(patient);
+            dispatch(disableParticipantEmotions(patient));
         }
     };
 }
@@ -156,7 +153,7 @@ export function startEmotionRecognition() {
                 );
                 if (emotionIsSubscribed) {
                     dispatch(
-                        addEmotion(emotion.userId, emotion.emotions.dominantEmotion)
+                        addEmotion(emotion.userId, emotion.emotions[0].dominantEmotion)
                     );
                 } else {
                     logger.warn(

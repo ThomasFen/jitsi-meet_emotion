@@ -34,7 +34,9 @@ class AllEmotionButton extends AbstractButton<Props, *> {
      * @returns {void}
      */
     _handleClick() {
-        subscribeToAllEmotions();
+        const { dispatch} = this.props;
+
+        dispatch(subscribeToAllEmotions());
     }
 }
 
